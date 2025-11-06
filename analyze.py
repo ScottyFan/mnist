@@ -1,9 +1,3 @@
-#!/usr/bin/env python3
-"""
-Simple script to analyze MNIST experiment results
-Usage: python analyze.py exp1.log exp2.log exp3.log exp4.log
-"""
-
 import sys
 import re
 import matplotlib.pyplot as plt
@@ -13,15 +7,12 @@ def parse_log(filename):
     with open(filename, 'r') as f:
         content = f.read()
     
-    # Extract test accuracies
     acc_pattern = r'Test set:.*?\(([\d.]+)%\)'
     accuracies = [float(x) for x in re.findall(acc_pattern, content)]
     
-    # Extract test losses
     loss_pattern = r'Test set: Average loss: ([\d.]+)'
     losses = [float(x) for x in re.findall(loss_pattern, content)]
     
-    # Extract config from filename or first line
     config = filename.replace('.log', '').replace('exp', 'Exp ')
     
     return {
@@ -34,7 +25,6 @@ def plot_results(experiments):
     """Create comparison plots"""
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
     
-    # Plot accuracies
     for exp in experiments:
         epochs = range(1, len(exp['accuracies']) + 1)
         ax1.plot(epochs, exp['accuracies'], marker='o', label=exp['name'])
@@ -45,7 +35,6 @@ def plot_results(experiments):
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     
-    # Plot losses
     for exp in experiments:
         epochs = range(1, len(exp['losses']) + 1)
         ax2.plot(epochs, exp['losses'], marker='s', label=exp['name'])
@@ -83,17 +72,16 @@ def main():
         try:
             exp = parse_log(log_file)
             experiments.append(exp)
-            print(f"✓ Parsed: {log_file}")
+            print(f"Parsed: {log_file}")
         except FileNotFoundError:
-            print(f"✗ Not found: {log_file}")
+            print(f"Not found: {log_file}")
         except Exception as e:
-            print(f"✗ Error parsing {log_file}: {e}")
+            print(f"Error parsing {log_file}: {e}")
     
     if experiments:
         plot_results(experiments)
     else:
-        print("No valid experiment files found!")
+        print("Invalid!")
 
 if __name__ == '__main__':
     main()
-    
