@@ -1,3 +1,8 @@
+# changed
+# parser.add_argument('--epochs', type=int, default=14, metavar='N',
+# To: parser.add_argument('--epochs', type=int, default=10, metavar='N',
+# parser.add_argument('--batch-size', type=int, default=64, metavar='N',
+# TO: parser.add_argument('--batch-size', type=int, default=128, metavar='N',
 import argparse
 import torch
 import torch.nn as nn
@@ -133,7 +138,7 @@ def main():
         scheduler.step()
 
     if args.save_model:
-        torch.save(model.state_dict(), "mnist_cnn.pt")
+        torch.save(model.state_dict(), f"mnist_cnn_{args.epochs}epochs.pt")
 
 
 if __name__ == '__main__':

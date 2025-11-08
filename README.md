@@ -1,47 +1,55 @@
 # MNIST Docker Project
 
-Simple Docker deployment of PyTorch MNIST training with hyperparameter experiments.
+Docker deployment of PyTorch MNIST training.
 
 ## Files
-- `Dockerfile` - Container configuration (MODIFIED: custom CMD with epochs=5, batch-size=128, lr=0.5)
+- `Dockerfile` - Container configuration
 - `main.py` - PyTorch MNIST training script
-- `requirements.txt` - Dependencies (torch, torchvision, matplotlib)
-- `README.md` - This file
+- `requirements.txt` - Dependencies
+- `README.md` -  Description
+- `Report` -  Compare the results with analysis
 
 ## Quick Start
+Create a GCP project
 
-### 1. Build Docker Image
-```bash
+Enable billing
+
+Enable APIs: Container, Compute, Artifact Registry
+
+## Local GCP CLI Setup
+gcloud auth login
+
+gcloud config set project wfgpuchase
+
+gcloud services enable container.googleapis.com compute.googleapis.com
+
+## Build Docker Image
 docker build -t mnist-pytorch .
-```
 
-### 2. Run with Default Parameters (from Dockerfile CMD)
-```bash
-docker run --name mnist-run mnist-pytorch 2>&1 | tee docker-run.out
-docker rm mnist-run
-```
+## Test Docker Run Locally 
+docker run mnist-pytorch
 
-### 3. Run Experiments with Different Hyperparameters
+## Push to Google Container Registry
+docker tag mnist-pytorch gcr.io/wfgpuchase/mnist-pytorch:latest
 
-**Experiment 1: Baseline (5 epochs, batch 64, lr 1.0)**
-```bash
-docker run mnist-pytorch python main.py --epochs 5 --batch-size 64 --lr 1.0 2>&1 | tee exp1.log
-```
+gcloud auth configure-docker
 
-**Experiment 2: Large Batch (5 epochs, batch 256, lr 1.0)**
-```bash
-docker run mnist-pytorch python main.py --epochs 5 --batch-size 256 --lr 1.0 2>&1 | tee exp2.log
-```
+docker push gcr.io/wfgpuchase/mnist-pytorch:latest
 
-**Experiment 3: More Epochs (10 epochs, batch 64, lr 1.0)**
-```bash
-docker run mnist-pytorch python main.py --epochs 10 --batch-size 64 --lr 1.0 2>&1 | tee exp3.log
-```
+## Deploy with Terraform
+terraform init
 
-**Experiment 4: Lower Learning Rate (5 epochs, batch 64, lr 0.5)**
-```bash
-docker run mnist-pytorch python main.py --epochs 5 --batch-size 64 --lr 0.5 2>&1 | tee exp4.log
-```
+terraform apply -var="project_id=wfgpuchase"
+
+## Run
+gcloud container clusters get-credentials 
+
+mnist-training-cluster --region us-central1
+
+kubectl create job mnist-training --image=gcr.io/wfgpuchase/mnist-pytorch:latest
+
+kubectl logs -f job/mnist-training
+
 
 ## Available Parameters
 
@@ -72,13 +80,6 @@ Compare the logs to see effects of:
    - Original: Would need manual parameter specification every run
    - Benefit: Container runs immediately with sensible defaults
 
-## Container Benefits
-
-- **Reproducibility**: Same results on any system
-- **Isolation**: No dependency conflicts with host
-- **Portability**: Easy to share and deploy
-- **Consistency**: Identical environment every time
-
 ## Expected Results
 
 - Training time: ~2-3 minutes per 5 epochs (CPU)
@@ -102,3 +103,11 @@ docker run mnist-pytorch python main.py --batch-size 32
 ```bash
 docker run -it mnist-pytorch bash
 ```
+
+
+# Screen Output
+
+![alt text](/screen_output/auth.png)
+![alt text](/screen_output/gcloud.png)
+![alt text](/screen_output/pytorch.png)
+![alt text](/screen_output/tag.png)
